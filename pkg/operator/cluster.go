@@ -263,7 +263,7 @@ func (r *ClusterController) reconcileKbom() reconcile.Func {
 					Image: fmt.Sprintf("%s/%s:%s", K8sRegistry, K8sRepo, r.version),
 				}},
 			},
-		}, map[string]v1alpha1.SbomReportData{kbomScanJobIdentifier: dbs})
+		}, map[string]v1alpha1.SbomReportData{kbomScanJobIdentifier: dbs}, []int{1})
 		if err != nil {
 			return ctrl.Result{}, err
 		}

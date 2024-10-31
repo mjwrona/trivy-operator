@@ -33,7 +33,7 @@ var _ = Describe("LimitChecker", func() {
 					Namespace: "trivy-operator",
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "scan-vulnerabilityreport-hash1",
+					Name:      "scan-vulnerabilityreport-1",
 					Namespace: "trivy-operator",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:            trivyoperator.AppTrivyOperator,
@@ -41,7 +41,7 @@ var _ = Describe("LimitChecker", func() {
 					},
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "scan-vulnerabilityreport-hash2",
+					Name:      "scan-vulnerabilityreport-2",
 					Namespace: "trivy-operator",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:            trivyoperator.AppTrivyOperator,
@@ -49,7 +49,7 @@ var _ = Describe("LimitChecker", func() {
 					},
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "scan-configauditreport-hash2",
+					Name:      "scan-vulnerabilityreport-3",
 					Namespace: "trivy-operator",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:            trivyoperator.AppTrivyOperator,
@@ -59,10 +59,10 @@ var _ = Describe("LimitChecker", func() {
 			).Build()
 
 			instance := jobs.NewLimitChecker(config, client, defaultTrivyOperatorConfig)
-			limitExceeded, jobsCount, err := instance.Check(context.TODO())
+			limitExceeded, unusedJobSuffixes, err := instance.Check(context.TODO())
 			Expect(err).ToNot(HaveOccurred())
 			Expect(limitExceeded).To(BeTrue())
-			Expect(jobsCount).To(Equal(3))
+			Expect(len(unusedJobSuffixes)).To(Equal(0))
 		})
 
 	})
@@ -76,7 +76,7 @@ var _ = Describe("LimitChecker", func() {
 					Namespace: "trivy-operator",
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "scan-vulnerabilityreport-hash1",
+					Name:      "scan-vulnerabilityreport-1",
 					Namespace: "trivy-operator",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:            trivyoperator.AppTrivyOperator,
@@ -86,10 +86,11 @@ var _ = Describe("LimitChecker", func() {
 			).Build()
 
 			instance := jobs.NewLimitChecker(config, client, defaultTrivyOperatorConfig)
-			limitExceeded, jobsCount, err := instance.Check(context.TODO())
+			limitExceeded, unusedJobSuffixes, err := instance.Check(context.TODO())
 			Expect(err).ToNot(HaveOccurred())
 			Expect(limitExceeded).To(BeFalse())
-			Expect(jobsCount).To(Equal(1))
+			Expect(len(unusedJobSuffixes)).To(Equal(1))
+			Expect(unusedJobSuffixes[0]).To(Equal(2))
 		})
 
 	})
@@ -103,7 +104,7 @@ var _ = Describe("LimitChecker", func() {
 					Namespace: "trivy-operator",
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "scan-vulnerabilityreport-hash1",
+					Name:      "scan-vulnerabilityreport-1",
 					Namespace: "default",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:            trivyoperator.AppTrivyOperator,
@@ -111,7 +112,7 @@ var _ = Describe("LimitChecker", func() {
 					},
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "scan-vulnerabilityreport-hash2",
+					Name:      "scan-vulnerabilityreport-2",
 					Namespace: "prod",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:            trivyoperator.AppTrivyOperator,
@@ -119,7 +120,7 @@ var _ = Describe("LimitChecker", func() {
 					},
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "scan-configauditreport-hash3",
+					Name:      "scan-vulnerabilityreport-3",
 					Namespace: "stage",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:            trivyoperator.AppTrivyOperator,
@@ -130,10 +131,10 @@ var _ = Describe("LimitChecker", func() {
 			trivyOperatorConfig := defaultTrivyOperatorConfig
 			trivyOperatorConfig[trivyoperator.KeyVulnerabilityScansInSameNamespace] = "true"
 			instance := jobs.NewLimitChecker(config, client, trivyOperatorConfig)
-			limitExceeded, jobsCount, err := instance.Check(context.TODO())
+			limitExceeded, unusedJobSuffixes, err := instance.Check(context.TODO())
 			Expect(err).ToNot(HaveOccurred())
 			Expect(limitExceeded).To(BeTrue())
-			Expect(jobsCount).To(Equal(3))
+			Expect(len(unusedJobSuffixes)).To(Equal(0))
 		})
 
 	})
@@ -148,7 +149,7 @@ var _ = Describe("LimitChecker", func() {
 					Namespace: "trivy-operator",
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "node-collector-hash1",
+					Name:      "node-collector-1",
 					Namespace: "trivy-operator",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:   trivyoperator.AppTrivyOperator,
@@ -156,7 +157,7 @@ var _ = Describe("LimitChecker", func() {
 					},
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "node-collector-hash2",
+					Name:      "node-collector-2",
 					Namespace: "trivy-operator",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:   trivyoperator.AppTrivyOperator,
@@ -164,7 +165,7 @@ var _ = Describe("LimitChecker", func() {
 					},
 				}},
 				&batchv1.Job{ObjectMeta: metav1.ObjectMeta{
-					Name:      "node-collector-hash3",
+					Name:      "node-collector-3",
 					Namespace: "trivy-operator",
 					Labels: map[string]string{
 						trivyoperator.LabelK8SAppManagedBy:   trivyoperator.AppTrivyOperator,
